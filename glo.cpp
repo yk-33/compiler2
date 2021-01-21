@@ -38,8 +38,9 @@ int brlab=-1; //break跳转
 int conlab=-1; //continue跳转
 int havewhile=0; //在while里
 int modes =1;  //编译生成模式
-int func1 = true;
-int regNeedST[27]; 
+int func1 = false;
+int regNeedST[26];
+int calledSave[26]; 
 int sizeForRisc; //翻译函数的大小
 void inser()
 {	value tes{'T',0,NULL,NULL,4,0,0};
@@ -1868,7 +1869,9 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				 {
 					 
 					 if(ii==0){varstore=varnum; numstore=temvarnum; labstore=label; func1=true;}
-					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=false;}
+					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=false;
+						for(int i=15;i<=25;i++){ calledSave[i]=regNeedST[i];    }
+						}
 				 if(modes==tigger||modes==riscv)clearAll();
 				 temNum=0;//栈初始位置
 				 varnum2 =varnum,temvarnum2=temvarnum;
@@ -2290,9 +2293,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								if(modes==riscv&&func1==false)risc_mv("a0",regName[reReg]);
 							}
 							for(int i=15;i<=25;i++)     
-							{
+							{	
+								if(calledSave[i]==1){
 								if(modes==tigger&&func1==false)cout<<"load "<<regInStack[i]<<" "<<regName[i]<<endl;
-								if(modes==riscv&&func1==false)risc_load(to_string(regInStack[i]),regName[i]);
+								if(modes==riscv&&func1==false)risc_load(to_string(regInStack[i]),regName[i]);}
 							}
 							if(modes==tigger&&func1==false)cout<<"  return"<<endl;
 							if(modes==riscv&&func1==false)risc_return();
@@ -2309,8 +2313,9 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==tigger||modes==riscv)clearAll();
 						for(int i=15;i<=25;i++)     
 						{
+							if(calledSave[i]==1){
 							if(modes==tigger&&func1==false)cout<<"load "<<regInStack[i]<<" "<<regName[i]<<endl;
-							if(modes==riscv&&func1==false)risc_load(to_string(regInStack[i]),regName[i]);
+							if(modes==riscv&&func1==false)risc_load(to_string(regInStack[i]),regName[i]);}
 						}
 						if(modes==tigger&&func1==false)cout<<"  return"<<endl;
 						if(modes==riscv&&func1==false)risc_return();
