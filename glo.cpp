@@ -446,7 +446,8 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 		}
 	}
 	Reg[chooseReg].varVector.clear();
-	//cout<<"---------------"<<chooseReg<<"-------------"<<endl;
+if(chooseReg>=15)
+	//cout<<"---------------"<<regName[chooseReg]<<"-------------"<<endl;
 	regNeedST[chooseReg]=1;
 	return chooseReg;
 }
@@ -1846,12 +1847,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 		     case funcdef:
 			 {	
 				 //cout<<"--------"<<endl;
-				 int ii=0; int varstore,numstore,labstore;
+				 int ii=0; int varstore,numstore,labstore;for(int j=15;j<=25;j++) {regNeedST[j]=0;}
 				 while(ii<2)
 				 {
-					 for(int j=15;j<=25;j++) regNeedST[j]=0;
-					 if(ii==0){varstore=varnum; numstore=temvarnum; labstore=label; func1=false;}
-					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=true;}
+					 
+					 if(ii==0){varstore=varnum; numstore=temvarnum; labstore=label; func1=true;}
+					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=false;}
 				 if(modes==tigger||modes==riscv)clearAll();
 				 temNum=0;//栈初始位置
 				 varnum2 =varnum,temvarnum2=temvarnum;
@@ -1950,7 +1951,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				nowmap=0;  status = 0;
 				mp[1].erase(mp[1].begin(),mp[1].end());
 
-				 ii++;}
+				 ii++;  }
 			 }
                 break;
             case funcparams:

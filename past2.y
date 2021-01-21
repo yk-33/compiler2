@@ -194,7 +194,7 @@ void yyerror(const char *s) //当yacc遇到语法错误时，会回调yyerror函
 
 int main(int argc, char* argv[])//程序主函数，这个函数也可以放到其它.c, .cpp文件里  
 {  
-    const char* sFile=argv[2];//"file.c";//打开要读取的文本文件  
+    const char* sFile="file.c";//打开要读取的文本文件 argv[2]; 
 	
     FILE* fp=fopen(sFile, "r");  
     if(fp==NULL)  
@@ -210,7 +210,8 @@ int main(int argc, char* argv[])//程序主函数，这个函数也可以放到�
     yyparse();//使yacc开始读取输入和解析，它会调用lex的yylex()读取记号  
     //puts("-----end parsing");  
 	fclose(fp); 
-	ofstream outfile(argv[4]);
+ofstream outfile("/home/yk-33/MiniVM/build/ofile.s");
+	//ofstream outfile(argv[4]);
 	//ofstream outfile("/home/guate/snap/MiniVM/build/ofile.s");
 	//ofstream outfile("/home/guate/runn/output.s");
      streambuf *oldbuf = cout.rdbuf(); 
