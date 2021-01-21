@@ -452,21 +452,37 @@ if(chooseReg>=15)
 	return chooseReg;
 }
 //调用者保存
-void saveReg()
+void saveReg(int callerSave[])
 {
+	int needSave;
 	for(int j=0;j<=14;j++){
-		if(modes==tigger&&func1==false)
-		cout<<"store "<<regName[j]<<" "<<regInStack[j]<<endl;
-		if(modes==riscv&&func1==false) risc_store(regName[j],to_string(regInStack[j]));
+		callerSave[j]=0;
+		needSave=0;
+		for (vector<string>::iterator it = Reg[j].varVector.begin(); it != Reg[j].varVector.end(); it++)
+		{
+			string var = *it;
+			if(var[0] != 't') needSave=1;
+			if(var[0] == 't'&&EMap.find(var)->second.saved == false) needSave=1;
+		}
+		if(needSave==1)
+		{
+			callerSave[j]=1;
+			if(modes==tigger&&func1==false)
+			cout<<"store "<<regName[j]<<" "<<regInStack[j]<<endl;
+			if(modes==riscv&&func1==false) risc_store(regName[j],to_string(regInStack[j]));
+		}
 	}
 }
 //调用者恢复
-void returnReg()
+void returnReg(int callerSave[])
 {
 	for(int j=0;j<=14;j++){
-		if(modes==tigger&&func1==false)
-		cout<<"load "<<regInStack[j]<<" "<< regName[j]<<endl;
-		if(modes==riscv&&func1==false)risc_load(to_string(regInStack[j]),regName[j]);
+		if(callerSave[j]==1)
+		{
+			if(modes==tigger&&func1==false)
+			cout<<"load "<<regInStack[j]<<" "<< regName[j]<<endl;
+			if(modes==riscv&&func1==false)risc_load(to_string(regInStack[j]),regName[j]);
+		}
 	}
 }
 //调函数传参
@@ -2358,6 +2374,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 			}
 			if(choose==3)
 			{	
+				int callerSave[15];
 				iter=mp[0].find("f_"+id);
                 if(iter==mp[0].end())   {  cout<<"NO FUNC ID"<<endl; exit(0);}
 				if(iter->second.arr==3)
@@ -2370,12 +2387,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 							if(modes==0)cout<<"  param"<<' '<<val<<endl;
 							if(modes==0)cout<<"  call f__sysy_starttime"<<endl;
 							if(modes==tigger||modes==riscv)storeGlo();
-							if(modes==tigger||modes==riscv)saveReg();
+							if(modes==tigger||modes==riscv)saveReg(callerSave);
 							if(modes==tigger&&func1==false)cout<<"a0 = "<<val<<endl;
 							if(modes==riscv&&func1==false)risc_integer("a0",to_string(val));
 							if(modes==tigger&&func1==false)cout<<"  call f__sysy_starttime"<<endl;
 							if(modes==riscv&&func1==false)cout<<"  call _sysy_starttime"<<endl;
-							if(modes==tigger||modes==riscv)returnReg();
+							if(modes==tigger||modes==riscv)returnReg(callerSave);
 						}
 						break;
 					}
@@ -2387,12 +2404,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 							if(modes==0)cout<<"  param"<<' '<<val<<endl;
 							if(modes==0)cout<<"  call f__sysy_stoptime"<<endl;
 							if(modes==tigger||modes==riscv)storeGlo();
-							if(modes==tigger||modes==riscv)saveReg();
+							if(modes==tigger||modes==riscv)saveReg(callerSave);
 							if(modes==tigger&&func1==false)cout<<"a0 = "<<val<<endl;
 							if(modes==riscv&&func1==false)risc_integer("a0",to_string(val));
 							if(modes==tigger&&func1==false)cout<<"  call f__sysy_stoptime"<<endl;
 							if(modes==riscv&&func1==false)cout<<"  call _sysy_stoptime"<<endl;
-							if(modes==tigger||modes==riscv)returnReg();
+							if(modes==tigger||modes==riscv)returnReg(callerSave);
 						}
 						break;
 					}
@@ -2400,10 +2417,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==0)cout<<"call f_"<<id<<endl;
 						if(modes==tigger||modes==riscv)storeGlo();
-						if(modes==tigger||modes==riscv)saveReg();
+						if(modes==tigger||modes==riscv)saveReg(callerSave);
 						if(modes==tigger&&func1==false)cout<<"call f_"<<id<<endl;
 						if(modes==riscv&&func1==false)cout<<"  call "<<id<<endl;
-						if(modes==tigger||modes==riscv)returnReg();
+						if(modes==tigger||modes==riscv)returnReg(callerSave);
 					}
 				}
 				else if(iter->second.arr==4)
@@ -2418,12 +2435,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==0)cout<<"  t"<<temvarnum-1<<" = call f_"<<id<<endl;
 						if(modes==tigger||modes==riscv)storeGlo();
-						if(modes==tigger||modes==riscv)saveReg();
+						if(modes==tigger||modes==riscv)saveReg(callerSave);
 						if(modes==tigger&&func1==false)cout<< "call f_"<<id<<endl;
 						if(modes==riscv&&func1==false)cout<< "  call "<<id<<endl;
 						if(modes==tigger&&func1==false)cout<<"store a0 "<<EMap.find("t"+to_string(temvarnum-1))->second.mem<<endl;
 						if(modes==riscv&&func1==false)risc_store("a0",EMap.find("t"+to_string(temvarnum-1))->second.mem);
-						if(modes==tigger||modes==riscv)returnReg();
+						if(modes==tigger||modes==riscv)returnReg(callerSave);
 					}
 					returnvar='t';
 					returnnum[0]=temvarnum-1;
@@ -2433,6 +2450,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 			}
 			if(choose==4||choose==5)
 			{
+				int callerSave[15];
 				iter=mp[0].find("f_"+id);
                 if(iter==mp[0].end()) {cout<<"NO FUNC ID"<<endl;exit(0);}
 				int arr=iter->second.arr;
@@ -2452,7 +2470,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				if(status==2||status==3)
 				{
 					if(modes==tigger||modes==riscv)storeGlo();
-					if(modes==tigger||modes==riscv)saveReg();
+					if(modes==tigger||modes==riscv)saveReg(callerSave);
 				}
 				int countReg=0;  //第几个传参寄存器
 				while(i>0)
@@ -2473,7 +2491,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==tigger&&func1==false)cout<<"  call f_"<<id<<endl;
 						if(modes==riscv&&func1==false)cout<<"  call "<<id<<endl;
-						if(modes==tigger||modes==riscv)returnReg();
+						if(modes==tigger||modes==riscv)returnReg(callerSave);
 					}
 				}
 				else if(arr==4)
@@ -2491,7 +2509,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==riscv&&func1==false)cout<<"  call "<<id<<endl;
 						if(modes==tigger&&func1==false)cout<<"store a0 "<<EMap.find("t"+to_string(temvarnum-1))->second.mem<<endl;
 						if(modes==riscv&&func1==false)risc_store("a0",EMap.find("t"+to_string(temvarnum-1))->second.mem);
-						if(modes==tigger||modes==riscv)returnReg();
+						if(modes==tigger||modes==riscv)returnReg(callerSave);
 					}
 					returnvar='t';
 					returnnum[0]=temvarnum-1;
