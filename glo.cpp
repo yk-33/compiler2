@@ -38,6 +38,7 @@ int brlab=-1; //break跳转
 int conlab=-1; //continue跳转
 int havewhile=0; //在while里
 int modes =2;  //编译生成模式
+int func1 = false; 
 int sizeForRisc; //翻译函数的大小
 void inser()
 {	value tes{'T',0,NULL,NULL,4,0,0};
@@ -238,7 +239,7 @@ void risc_loadAddr(string mempos,string reg)
 	}
 }
 /////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////// 
 //                              Tigger
 //s10 :替换 ,s11 :4,  x0 : 0
 int gloNum = 0;
@@ -407,8 +408,8 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 					int addReg = EMap.find("A_" + var)->second.reg;
 					if ( addReg!= -1)
 					{
-						if(modes==tigger)cout<<regName[addReg]<<"[ 0 ] = "<< regName[chooseReg] <<endl;
-						if(modes==riscv)risc_arrAssign(regName[addReg],"0",regName[chooseReg]);
+						if(modes==tigger&&func1==false)cout<<regName[addReg]<<"[ 0 ] = "<< regName[chooseReg] <<endl;
+						if(modes==riscv&&func1==false)risc_arrAssign(regName[addReg],"0",regName[chooseReg]);
 					}
 					else
 					{
@@ -418,15 +419,15 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 						Reg[chooseReg].canUse = true;
 						Reg[i].varVector.push_back("A_"+var);
 						EMap.find("A_" + var)->second.reg = i;
-						if(modes==tigger)cout << "loadaddr " << EMap.find(var)->second.mem << " " << regName[i] << endl;
-						if(modes==tigger)cout << regName[i] << "[ 0 ] = " << regName[chooseReg] << endl;
-						if(modes==riscv)risc_loadAddr( EMap.find(var)->second.mem,regName[i]);
-						if(modes==riscv)risc_arrAssign(regName[i],"0",regName[chooseReg]);
+						if(modes==tigger&&func1==false)cout << "loadaddr " << EMap.find(var)->second.mem << " " << regName[i] << endl;
+						if(modes==tigger&&func1==false)cout << regName[i] << "[ 0 ] = " << regName[chooseReg] << endl;
+						if(modes==riscv&&func1==false)risc_loadAddr( EMap.find(var)->second.mem,regName[i]);
+						if(modes==riscv&&func1==false)risc_arrAssign(regName[i],"0",regName[chooseReg]);
 					}
 				}
 				else{
-					if(modes==tigger)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
-					if(modes==riscv)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
+					if(modes==tigger&&func1==false)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
+					if(modes==riscv&&func1==false)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
 				}
 			}
 			EMap.find(var)->second.reg = -1;
@@ -437,8 +438,8 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 			{
 				if (EMap.find(var)->second.saved == false)
 				{
-					if(modes==tigger)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
-					if(modes==riscv)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
+					if(modes==tigger&&func1==false)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
+					if(modes==riscv&&func1==false)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
 				}
 			}EMap.find(var)->second.reg = -1;
 		}
@@ -451,18 +452,18 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 void saveReg()
 {
 	for(int j=0;j<=14;j++){
-		if(modes==tigger)
+		if(modes==tigger&&func1==false)
 		cout<<"store "<<regName[j]<<" "<<regInStack[j]<<endl;
-		if(modes==riscv) risc_store(regName[j],to_string(regInStack[j]));
+		if(modes==riscv&&func1==false) risc_store(regName[j],to_string(regInStack[j]));
 	}
 }
 //调用者恢复
 void returnReg()
 {
 	for(int j=0;j<=14;j++){
-		if(modes==tigger)
+		if(modes==tigger&&func1==false)
 		cout<<"load "<<regInStack[j]<<" "<< regName[j]<<endl;
-		if(modes==riscv)risc_load(to_string(regInStack[j]),regName[j]);
+		if(modes==riscv&&func1==false)risc_load(to_string(regInStack[j]),regName[j]);
 	}
 }
 //调函数传参
@@ -470,8 +471,8 @@ void loadInReg(string evar,int reg)
 {
 	if ((evar[0] - '0' >= 0 && evar[0] - '0' <= 9)||evar[0]=='-')
 	{
-		if(modes==tigger)cout<<regName[reg]<<" = "<<evar<<endl;
-		if(modes==riscv)risc_integer(regName[reg],evar);
+		if(modes==tigger&&func1==false)cout<<regName[reg]<<" = "<<evar<<endl;
+		if(modes==riscv&&func1==false)risc_integer(regName[reg],evar);
 		return;
 	}
 	if (EMap.find(evar)->second.arr==false)
@@ -481,18 +482,18 @@ void loadInReg(string evar,int reg)
 		{
 			if(iter->second.reg>=15)
 			{
-				if(modes==tigger)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
-				if(modes==riscv)risc_mv(regName[reg],regName[iter->second.reg]);
+				if(modes==tigger&&func1==false)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
+				if(modes==riscv&&func1==false)risc_mv(regName[reg],regName[iter->second.reg]);
 			}
 			else
 			{
-				if(modes==tigger)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
-				if(modes==riscv)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
+				if(modes==tigger&&func1==false)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
+				if(modes==riscv&&func1==false)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
 			}
 		} 
 		else{
-			if(modes==tigger)cout << "load " << iter->second.mem << " " << regName[reg] << endl;
-			if(modes==riscv)risc_load(iter->second.mem,regName[reg]);
+			if(modes==tigger&&func1==false)cout << "load " << iter->second.mem << " " << regName[reg] << endl;
+			if(modes==riscv&&func1==false)risc_load(iter->second.mem,regName[reg]);
 		}
 	}
 	if (EMap.find(evar)->second.arr==true)
@@ -505,19 +506,19 @@ void loadInReg(string evar,int reg)
 			{
 				if(iter->second.reg>=15)
 				{
-					if(modes==tigger)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
-					if(modes==riscv)risc_mv(regName[reg],regName[iter->second.reg]);
+					if(modes==tigger&&func1==false)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
+					if(modes==riscv&&func1==false)risc_mv(regName[reg],regName[iter->second.reg]);
 				}
 				else
 				{
-					if(modes==tigger)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
-					if(modes==riscv)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
+					if(modes==tigger&&func1==false)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
+					if(modes==riscv&&func1==false)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
 				}
 			}
 			else
 			{
-				if(modes==tigger)cout << "loadaddr " << iter->second.mem << " " << regName[reg] << endl;
-				if(modes==riscv)risc_loadAddr(iter->second.mem,regName[reg]);
+				if(modes==tigger&&func1==false)cout << "loadaddr " << iter->second.mem << " " << regName[reg] << endl;
+				if(modes==riscv&&func1==false)risc_loadAddr(iter->second.mem,regName[reg]);
 			}
 		}
 		if (evar[0] == 'T'&&EMap.find(evar)->second.type == 1)
@@ -527,19 +528,19 @@ void loadInReg(string evar,int reg)
 			{
 				if(iter->second.reg>=15)
 				{
-					if(modes==tigger)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
-					if(modes==riscv)risc_mv(regName[reg],regName[iter->second.reg]);
+					if(modes==tigger&&func1==false)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
+					if(modes==riscv&&func1==false)risc_mv(regName[reg],regName[iter->second.reg]);
 				}
 				else
 				{
-					if(modes==tigger)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
-					if(modes==riscv)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
+					if(modes==tigger&&func1==false)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
+					if(modes==riscv&&func1==false)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
 				}
 			}
 			else
 			{
-				if(modes==tigger)cout << "loadaddr " << iter->second.mem << " " << regName[reg] << endl;
-				if(modes==riscv)risc_loadAddr(iter->second.mem,regName[reg]);
+				if(modes==tigger&&func1==false)cout << "loadaddr " << iter->second.mem << " " << regName[reg] << endl;
+				if(modes==riscv&&func1==false)risc_loadAddr(iter->second.mem,regName[reg]);
 			}
 		}
 	}
@@ -559,8 +560,8 @@ int load(string evar,bool arry,bool addyunn=false,string t1=" ",string t2=" ") {
 			i=findReg(1,t1,t2);
 			NMap[evar] = {false,true,"0",i};
 			Reg[i].varVector.push_back(evar);
-			if(modes==tigger)cout << regName[i] << " = " << evar << endl;
-			if(modes==riscv)risc_integer(regName[i],evar);
+			if(modes==tigger&&func1==false)cout << regName[i] << " = " << evar << endl;
+			if(modes==riscv&&func1==false)risc_integer(regName[i],evar);
 			return i;
 		}
 	}
@@ -573,8 +574,8 @@ int load(string evar,bool arry,bool addyunn=false,string t1=" ",string t2=" ") {
 			i=findReg();
 			if(addyunn==true )
 			i=findReg(1,t1,t2);
-		if(modes==tigger)cout << "load " << iter->second.mem << " " << regName[i] << endl;
-		if(modes==riscv)risc_load(iter->second.mem,regName[i]);
+		if(modes==tigger&&func1==false)cout << "load " << iter->second.mem << " " << regName[i] << endl;
+		if(modes==riscv&&func1==false)risc_load(iter->second.mem,regName[i]);
 		iter->second.reg = i;
 		iter->second.saved = true;
 		Reg[i].varVector.push_back(evar);
@@ -590,8 +591,8 @@ int load(string evar,bool arry,bool addyunn=false,string t1=" ",string t2=" ") {
 			else
 			{
 				int i = findReg();
-				if(modes==tigger)cout << "load " << iter->second.mem << " " << regName[i] << endl;
-				if(modes==riscv)risc_load(iter->second.mem,regName[i]);
+				if(modes==tigger&&func1==false)cout << "load " << iter->second.mem << " " << regName[i] << endl;
+				if(modes==riscv&&func1==false)risc_load(iter->second.mem,regName[i]);
 				iter->second.reg = i;
 				iter->second.saved = true;
 				Reg[i].varVector.push_back(evar);
@@ -605,8 +606,8 @@ int load(string evar,bool arry,bool addyunn=false,string t1=" ",string t2=" ") {
 			else
 			{
 				int i = findReg();
-				if(modes==tigger)cout << "loadaddr " << iter->second.mem << " " << regName[i] << endl;
-				if(modes==riscv)risc_loadAddr(iter->second.mem,regName[i]);
+				if(modes==tigger&&func1==false)cout << "loadaddr " << iter->second.mem << " " << regName[i] << endl;
+				if(modes==riscv&&func1==false)risc_loadAddr(iter->second.mem,regName[i]);
 				iter->second.reg = i;
 				iter->second.saved = true;
 				Reg[i].varVector.push_back("A_" + evar);
@@ -620,8 +621,8 @@ int load(string evar,bool arry,bool addyunn=false,string t1=" ",string t2=" ") {
 			else
 			{
 				int i = findReg();
-				if(modes==tigger)cout << "loadaddr " << iter->second.mem << " " << regName[i] << endl;
-				if(modes==riscv)risc_loadAddr(iter->second.mem,regName[i]);
+				if(modes==tigger&&func1==false)cout << "loadaddr " << iter->second.mem << " " << regName[i] << endl;
+				if(modes==riscv&&func1==false)risc_loadAddr(iter->second.mem,regName[i]);
 				iter->second.reg = i;
 				iter->second.saved = true;
 				Reg[i].varVector.push_back(evar);
@@ -644,7 +645,7 @@ void storeGlo()
 				int addReg = EMap.find("A_" + var)->second.reg;
 				if (addReg != -1)
 				{
-					if(modes==tigger)cout << regName[addReg] << "[ 0 ] = " << regName[chooseReg] << endl;
+					if(modes==tigger&&func1==false)cout << regName[addReg] << "[ 0 ] = " << regName[chooseReg] << endl;
 					if(modes==riscv)risc_arrAssign(regName[addReg],"0",regName[chooseReg]);
 				}
 				else
@@ -655,10 +656,10 @@ void storeGlo()
 					Reg[chooseReg].canUse = true;
 					Reg[i].varVector.push_back("A_" + var);
 					EMap.find("A_" + var)->second.reg = i;
-					if(modes==tigger)cout << "loadaddr " << EMap.find(var)->second.mem << " " <<regName[i]  << endl;
-					if(modes==tigger)cout << regName[i] << "[ 0 ] = " << regName[chooseReg] << endl;
-					if(modes==riscv)risc_loadAddr(EMap.find(var)->second.mem,regName[i]);
-					if(modes==riscv)risc_arrAssign(regName[i],"0",regName[chooseReg]);
+					if(modes==tigger&&func1==false)cout << "loadaddr " << EMap.find(var)->second.mem << " " <<regName[i]  << endl;
+					if(modes==tigger&&func1==false)cout << regName[i] << "[ 0 ] = " << regName[chooseReg] << endl;
+					if(modes==riscv&&func1==false)risc_loadAddr(EMap.find(var)->second.mem,regName[i]);
+					if(modes==riscv&&func1==false)risc_arrAssign(regName[i],"0",regName[chooseReg]);
 				}
 				EMap.find(var)->second.saved=true;
 			}
@@ -692,8 +693,8 @@ void storeReg()
 							int addReg = EMap.find("A_" + var)->second.reg;
 							if (addReg != -1)
 							{
-								if(modes==tigger)cout << regName[addReg] << "[ 0 ] = " << regName[chooseReg] << endl;
-								if(modes==riscv)risc_arrAssign(regName[addReg],"0",regName[chooseReg]);
+								if(modes==tigger&&func1==false)cout << regName[addReg] << "[ 0 ] = " << regName[chooseReg] << endl;
+								if(modes==riscv&&func1==false)risc_arrAssign(regName[addReg],"0",regName[chooseReg]);
 							}
 							else
 							{
@@ -703,16 +704,16 @@ void storeReg()
 								Reg[chooseReg].canUse = true;
 								Reg[i].varVector.push_back("A_" + var);
 								EMap.find("A_" + var)->second.reg = i;
-								if(modes==tigger)cout << "loadaddr " << EMap.find(var)->second.mem << " " <<regName[i]  << endl;
-								if(modes==tigger)cout << regName[i] << "[ 0 ] = " << regName[chooseReg] << endl;
-								if(modes==riscv)risc_loadAddr(EMap.find(var)->second.mem,regName[i]);
-								if(modes==riscv)risc_arrAssign(regName[i],"0",regName[chooseReg]);
+								if(modes==tigger&&func1==false)cout << "loadaddr " << EMap.find(var)->second.mem << " " <<regName[i]  << endl;
+								if(modes==tigger&&func1==false)cout << regName[i] << "[ 0 ] = " << regName[chooseReg] << endl;
+								if(modes==riscv&&func1==false)risc_loadAddr(EMap.find(var)->second.mem,regName[i]);
+								if(modes==riscv&&func1==false)risc_arrAssign(regName[i],"0",regName[chooseReg]);
 							}
 						}
 						else
 						{
-							if(modes==tigger)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
-							if(modes==riscv)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
+							if(modes==tigger&&func1==false)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
+							if(modes==riscv&&func1==false)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
 						}
 					}
 					EMap.find(var)->second.reg = -1;
@@ -723,8 +724,8 @@ void storeReg()
 					{
 						if (EMap.find(var)->second.saved == false)
 						{
-							if(modes==tigger)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
-							if(modes==riscv)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
+							if(modes==tigger&&func1==false)cout << "store " << regName[chooseReg] << " " << EMap.find(var)->second.mem << endl;
+							if(modes==riscv&&func1==false)risc_store(regName[chooseReg],EMap.find(var)->second.mem);
 						}
 					}EMap.find(var)->second.reg = -1;
 				}
@@ -763,8 +764,8 @@ void arrUse(string t,string arr,string arrIndex)
 		{
 			int i = findReg();
 			int j = atoi((EMap.find(arr)->second.mem).c_str());
-			if(modes==tigger)cout << "load "  << index/4 + j << "  "<<regName[i] << endl;
-			if(modes==riscv)risc_load(to_string(index/4 + j),regName[i]);
+			if(modes==tigger&&func1==false)cout << "load "  << index/4 + j << "  "<<regName[i] << endl;
+			if(modes==riscv&&func1==false)risc_load(to_string(index/4 + j),regName[i]);
 			Reg[i].varVector.push_back(t);
 			EMap.find(t)->second.reg = i;
 			EMap.find(t)->second.saved = false;
@@ -773,8 +774,8 @@ void arrUse(string t,string arr,string arrIndex)
 		{
 			int i = load(arr, true);
 			int j= findReg();
-			if(modes==tigger)cout << regName[j] << " = " << regName[i] << "[ "<< index <<" ] " << endl;
-			if(modes==riscv)risc_arrUse(regName[j],regName[i],to_string(index));
+			if(modes==tigger&&func1==false)cout << regName[j] << " = " << regName[i] << "[ "<< index <<" ] " << endl;
+			if(modes==riscv&&func1==false)risc_arrUse(regName[j],regName[i],to_string(index));
 			Reg[j].varVector.push_back(t);
 			EMap.find(t)->second.reg = j;
 			EMap.find(t)->second.saved = false;
@@ -790,10 +791,10 @@ void arrUse(string t,string arr,string arrIndex)
 		int k = findReg();
 		Reg[i].canUse = true;
 		//cout << regName[k] << " = " << regName[j] << " * 4" << endl;
-		if(modes==tigger)cout<< regName[k] << " = " << regName[i] << " + " <<regName[j]<< endl;
-		if(modes==tigger)cout << regName[k] << " = " << regName[k] << "[ 0 ] " << endl;
-		if(modes==riscv)risc_op(regName[k],regName[i],regName[j],"+");
-		if(modes==riscv)risc_arrUse(regName[k],regName[k],"0");
+		if(modes==tigger&&func1==false)cout<< regName[k] << " = " << regName[i] << " + " <<regName[j]<< endl;
+		if(modes==tigger&&func1==false)cout << regName[k] << " = " << regName[k] << "[ 0 ] " << endl;
+		if(modes==riscv&&func1==false)risc_op(regName[k],regName[i],regName[j],"+");
+		if(modes==riscv&&func1==false)risc_arrUse(regName[k],regName[k],"0");
 		Reg[k].varVector.push_back(t);
 		EMap.find(t)->second.reg = k;
 		EMap.find(t)->second.saved = false;
@@ -811,8 +812,8 @@ void arrAssig(string t, string arr, string arrIndex)
 			if (t[0] == 't')
 				EMap.find(t)->second.canDel = true;
 			int j = atoi((EMap.find(arr)->second.mem).c_str());
-			if(modes==tigger)cout << "store " << regName[i] << "  " << index/4 + j << endl;
-			if(modes==riscv)risc_store(regName[i],to_string(index/4 + j));
+			if(modes==tigger&&func1==false)cout << "store " << regName[i] << "  " << index/4 + j << endl;
+			if(modes==riscv&&func1==false)risc_store(regName[i],to_string(index/4 + j));
 		}
 		else
 		{
@@ -822,8 +823,8 @@ void arrAssig(string t, string arr, string arrIndex)
 			if (t[0] == 't')
 				EMap.find(t)->second.canDel = true;
 			Reg[i].canUse = true;
-			if(modes==tigger)cout << regName[i] << "[ " << index << " ] = " <<regName[j]<< endl;
-			if(modes==riscv)risc_arrAssign(regName[i],to_string(index),regName[j]);
+			if(modes==tigger&&func1==false)cout << regName[i] << "[ " << index << " ] = " <<regName[j]<< endl;
+			if(modes==riscv&&func1==false)risc_arrAssign(regName[i],to_string(index),regName[j]);
 		}
 	}
 	else
@@ -836,15 +837,15 @@ void arrAssig(string t, string arr, string arrIndex)
 		int k = findReg();
 		Reg[i].canUse = true;
 		//cout << regName[k] << " = " << regName[j] << " * 4" << endl;
-		if(modes==tigger)cout << regName[k] << " = " << regName[i] << " + " << regName[j] << endl;
-		if(modes==riscv)risc_op(regName[k],regName[i],regName[j],"+");
+		if(modes==tigger&&func1==false)cout << regName[k] << " = " << regName[i] << " + " << regName[j] << endl;
+		if(modes==riscv&&func1==false)risc_op(regName[k],regName[i],regName[j],"+");
 		Reg[k].canUse = false;
 		int m= load(t,false);
 		Reg[k].canUse = true;
 		if(t[0]=='t')
 			EMap.find(t)->second.canDel = true;
-		if(modes==tigger)cout << regName[k] << "[ 0 ] = " <<regName[m]<< endl;
-		if(modes==riscv)risc_arrAssign(regName[k],"0",regName[m]);
+		if(modes==tigger&&func1==false)cout << regName[k] << "[ 0 ] = " <<regName[m]<< endl;
+		if(modes==riscv&&func1==false)risc_arrAssign(regName[k],"0",regName[m]);
 	}
 }
 //运算
@@ -859,8 +860,8 @@ void addyun(string v0,string v1,string v2,string yun)
 	if(v2[0]=='t'&&yun!=">"&&yun!="<")
 		EMap.find(v2)->second.canDel = true;
 	int k=findReg();
-	if(modes==tigger)cout<<regName[k]<<" = "<<regName[i]<<' '<<yun<<' '<<regName[j]<<endl;
-	if(modes==riscv)risc_op(regName[k],regName[i],regName[j],yun);
+	if(modes==tigger&&func1==false)cout<<regName[k]<<" = "<<regName[i]<<' '<<yun<<' '<<regName[j]<<endl;
+	if(modes==riscv&&func1==false)risc_op(regName[k],regName[i],regName[j],yun);
 	EMap.find(v0)->second.reg = k;
 	EMap.find(v0)->second.saved = false;
 	Reg[k].varVector.push_back(v0);
@@ -872,8 +873,8 @@ void opyun(string v0,string v1,string yun)
 	if(v1[0]=='t')
 		EMap.find(v1)->second.canDel = true;
 	int k=findReg();
-	if(modes==tigger)cout<<regName[k]<<" = "<<yun<<" "<<regName[i]<<endl;
-	if(modes==riscv)risc_uOp(regName[k],regName[i],yun);
+	if(modes==tigger&&func1==false)cout<<regName[k]<<" = "<<yun<<" "<<regName[i]<<endl;
+	if(modes==riscv&&func1==false)risc_uOp(regName[k],regName[i],yun);
 	EMap.find(v0)->second.reg = k;
 	EMap.find(v0)->second.saved = false;
 	Reg[k].varVector.push_back(v0);
@@ -892,13 +893,13 @@ void eVarMap(string varName,int len=0,int va=0) {
 			EMap[ varName] = { false,true,"v" + to_string(gloNum),-1,0 ,arr };
 			if (len == 1) 
 			{
-				if(modes==tigger)cout << "v" << gloNum << " = " << va << endl;
-				if(modes==riscv)risc_gloVar("v"+to_string(gloNum),va);
+				if(modes==tigger&&func1==false)cout << "v" << gloNum << " = " << va << endl;
+				if(modes==riscv&&func1==false)risc_gloVar("v"+to_string(gloNum),va);
 			}
 			else
 			{
-				if(modes==tigger)cout << "v" << gloNum << " = malloc " << 4*len << endl;
-				if(modes==riscv)risc_gloArr("v"+to_string(gloNum),4*len);
+				if(modes==tigger&&func1==false)cout << "v" << gloNum << " = malloc " << 4*len << endl;
+				if(modes==riscv&&func1==false)risc_gloArr("v"+to_string(gloNum),4*len);
 			}
 			gloNum++;
 		}
