@@ -11,7 +11,6 @@ using namespace std;
 #define tigger 1
 #define riscv 2
 
-
 map<string, value> mp[10];
 map<string,value>::iterator iter;
 int nowmap=0;
@@ -97,7 +96,7 @@ void draw(int i,int max)
 	}
 	
 }
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////// fun1==false
 //                         RISC -V
 string regName[28] = { "a0","a1","a2","a3","a4","a5","a6","a7","t0","t1","t2","t3","t4","t5","t6","s0","s1","s2" ,
 	"s3","s4","s5" ,"s6","s7","s8" ,"s9","s10","s11" ,"x0"};
@@ -445,7 +444,7 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 		}
 	}
 	Reg[chooseReg].varVector.clear();
-	cout<<"---------------"<<chooseReg<<"-------------"<<endl;
+	//cout<<"---------------"<<chooseReg<<"-------------"<<endl;
 	return chooseReg;
 }
 //调用者保存
@@ -1356,8 +1355,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					 	clearAll();
 					 	int v1=load(jiexi(leftvar,leftnum),false);
 					 	//int v2=load("0",false);
-						if(modes==tigger)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
-						if(modes==riscv)cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
+						if(modes==tigger&&fun1==false)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
+						if(modes==riscv&&fun1==false)cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
 					 }
 					 
 				}
@@ -1383,8 +1382,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					 	storeReg();
 					 	clearAll();
 					 	int v1=load(jiexi(leftvar,leftnum),false);
-						if(modes==tigger)cout<<" if "<<regName[v1]<<" != "<<"x0"<<" goto l"<<temlab<<endl;
-						if(modes==riscv)cout<<"	bne "<<regName[v1]<<",x0,.l"<<temlab<<endl;
+						if(modes==tigger&&fun1==false)cout<<" if "<<regName[v1]<<" != "<<"x0"<<" goto l"<<temlab<<endl;
+						if(modes==riscv&&fun1==false)cout<<"	bne "<<regName[v1]<<",x0,.l"<<temlab<<endl;
 					 }
 					 	 
 				}
@@ -1437,12 +1436,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger)
+							if(modes==tigger&&fun1==false)
 							{
 								cout<<"  goto l"<<temlab2<<endl;
 					 			cout<<"l"<<temlab<<':'<<endl;
 							}
-							if(modes==riscv)
+							if(modes==riscv&&fun1==false)
 							{
 								cout<<"	j .l"<<temlab2<<endl;
 					 			cout<<".l"<<temlab<<':'<<endl;
@@ -1454,11 +1453,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger)
+							if(modes==tigger&&fun1==false)
 							{
 					 			cout<<"l"<<temlab2<<":"<<endl;
 							}
-							if(modes==riscv)
+							if(modes==riscv&&fun1==false)
 							{
 					 			cout<<".l"<<temlab2<<":"<<endl;
 							}
@@ -1470,12 +1469,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger)
+							if(modes==tigger&&fun1==false)
 							{
 								cout<<"  goto l"<<temlab2<<endl;
 					 			cout<<"l"<<temlab<<':'<<endl;
 							}
-							if(modes==riscv)
+							if(modes==riscv&&fun1==false)
 							{
 								cout<<"	j .l"<<temlab2<<endl;
 					 			cout<<".l"<<temlab<<':'<<endl;
@@ -1487,11 +1486,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger)
+							if(modes==tigger&&fun1==false)
 							{
 					 			cout<<"l"<<temlab2<<":"<<endl;
 							}
-							if(modes==riscv)
+							if(modes==riscv&&fun1==false)
 							{
 					 			cout<<".l"<<temlab2<<":"<<endl;
 							}
@@ -1844,6 +1843,9 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 		     case funcdef:
 			 {	
 				 //cout<<"--------"<<endl;
+				 int ii=0;
+				 while(ii<2)
+				 {
 				 if(modes==tigger||modes==riscv)clearAll();
 				 temNum=0;
 				 varnum2 =varnum,temvarnum2=temvarnum;
@@ -1937,7 +1939,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				nowmap=0;  status = 0;
 				mp[1].erase(mp[1].begin(),mp[1].end());
 
-				
+				 ii++;}
 			 }
                 break;
             case funcparams:
@@ -2104,8 +2106,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==tigger||modes==riscv)
 						{
 							int v1=load(jiexi(leftvar,leftnum),false);
-					 		if(modes==tigger)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
-							if(modes==riscv) cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
+					 		if(modes==tigger&&func1==false)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
+							if(modes==riscv&&func1==false) cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
 						}
 					}
                     p[1]->doo(0);
@@ -2113,14 +2115,14 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==tigger||modes==riscv)storeReg();
 						if(modes==tigger||modes==riscv)clearAll();
-						if(modes==tigger)cout<<"  goto l"<<temlab2<<endl;
-						if(modes==riscv)cout<<"	j .l"<<temlab2<<endl;
+						if(modes==tigger&&func1==false)cout<<"  goto l"<<temlab2<<endl;
+						if(modes==riscv&&func1==false)cout<<"	j .l"<<temlab2<<endl;
 					}
                     if(status==2||status==3)
 					{
-						if(modes==tigger)
+						if(modes==tigger&&func1==false)
 						cout<<"l"<<temlab<<':'<<endl;
-						if(modes==riscv)
+						if(modes==riscv&&func1==false)
 						cout<<".l"<<temlab<<':'<<endl;
 					}
                     p[2]->doo(0);
@@ -2128,8 +2130,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==tigger||modes==riscv)storeReg();
 						if(modes==tigger||modes==riscv)clearAll();
-						if(modes==tigger)cout<<'l'<<temlab2<<':'<<endl;
-						if(modes==riscv)cout<<".l"<<temlab2<<':'<<endl;
+						if(modes==tigger&&func1==false)cout<<'l'<<temlab2<<':'<<endl;
+						if(modes==riscv&&func1==false)cout<<".l"<<temlab2<<':'<<endl;
 					}
                 }
                 if(choose==6)
@@ -2152,8 +2154,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==tigger||modes==riscv)
 						{
 							int v1=load(jiexi(leftvar,leftnum),false);
-					 		if(modes==tigger)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
-							if(modes==riscv)
+					 		if(modes==tigger&&func1==false)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
+							if(modes==riscv&&func1==false)
 							cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
 						}
 					}
@@ -2163,8 +2165,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==tigger||modes==riscv)storeReg();
 						if(modes==tigger||modes==riscv)clearAll();
-						if(modes==tigger)cout<<"l"<<temlab<<':'<<endl;
-						if(modes==riscv)cout<<".l"<<temlab<<':'<<endl;
+						if(modes==tigger&&func1==false)cout<<"l"<<temlab<<':'<<endl;
+						if(modes==riscv&&func1==false)cout<<".l"<<temlab<<':'<<endl;
 					}
                     
                 }
@@ -2184,9 +2186,9 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
                     conlab=temlab;
                     if(status==2||status==3)
 					{
-						if(modes==tigger)
+						if(modes==tigger&&func1==false)
 						cout<<"l"<<temlab<<':'<<endl;
-						if(modes==riscv)cout<<".l"<<temlab<<':'<<endl;
+						if(modes==riscv&&func1==false)cout<<".l"<<temlab<<':'<<endl;
 					}
                     p[0]->doo(0);
                     leftvar=returnvar;
@@ -2199,8 +2201,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==tigger||modes==riscv)
 						{
 							int v1=load(jiexi(leftvar,leftnum),false);
-					 		if(modes==tigger)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab2<<endl;
-							if(modes==riscv)
+					 		if(modes==tigger&&func1==false)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab2<<endl;
+							if(modes==riscv&&func1==false)
 							cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab2<<endl;
 						}
 					}
@@ -2209,13 +2211,13 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					{
 						if(modes==tigger||modes==riscv)storeReg();
 						if(modes==tigger||modes==riscv)clearAll();
-						if(modes==tigger)cout<<"  goto l"<<temlab<<endl;
-						if(modes==riscv)cout<<"	j .l"<<temlab<<endl;
+						if(modes==tigger&&func1==false)cout<<"  goto l"<<temlab<<endl;
+						if(modes==riscv&&func1==false)cout<<"	j .l"<<temlab<<endl;
 					}
                     if(status==2||status==3)
 					{
-						if(modes==tigger)cout<<"l"<<temlab2<<':'<<endl;
-						if(modes==riscv)cout<<".l"<<temlab2<<':'<<endl;
+						if(modes==tigger&&func1==false)cout<<"l"<<temlab2<<':'<<endl;
+						if(modes==riscv&&func1==false)cout<<".l"<<temlab2<<':'<<endl;
 					}
 
                     brlab = Fbrlab,conlab = Fconlab,havewhile = Fhavewhile;
@@ -2227,8 +2229,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						{
 							if(modes==tigger||modes==riscv)storeReg();
 							if(modes==tigger||modes==riscv)clearAll();
-							if(modes==tigger)cout<<"  goto l"<<brlab<<endl;
-							if(modes==riscv)cout<<"	j .l"<<brlab<<endl;
+							if(modes==tigger&&func1==false)cout<<"  goto l"<<brlab<<endl;
+							if(modes==riscv&&func1==false)cout<<"	j .l"<<brlab<<endl;
 						}
                 }
                 if(choose==9)
@@ -2238,8 +2240,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						{
 							if(modes==tigger||modes==riscv)storeReg();
 							if(modes==tigger||modes==riscv)clearAll();
-							if(modes==tigger)cout<<"  goto l"<<conlab<<endl;
-							if(modes==riscv)cout<<"	j .l"<<conlab<<endl;
+							if(modes==tigger&&func1==false)cout<<"  goto l"<<conlab<<endl;
+							if(modes==riscv&&func1==false)cout<<"	j .l"<<conlab<<endl;
 						}
                 }
 				if(choose==10)
@@ -2256,16 +2258,16 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 							int reReg=load(jiexi(returnvar,returnnum[0]),true);
 							if(regName[reReg]!="a0")
 							{
-								if(modes==tigger)cout<<"a0 = "<<regName[reReg]<<endl;
-								if(modes==riscv)risc_mv("a0",regName[reReg]);
+								if(modes==tigger&&func1==false)cout<<"a0 = "<<regName[reReg]<<endl;
+								if(modes==riscv&&func1==false)risc_mv("a0",regName[reReg]);
 							}
 							for(int i=15;i<=25;i++)     
 							{
-								if(modes==tigger)cout<<"load "<<regInStack[i]<<" "<<regName[i]<<endl;
-								if(modes==riscv)risc_load(to_string(regInStack[i]),regName[i]);
+								if(modes==tigger&&func1==false)cout<<"load "<<regInStack[i]<<" "<<regName[i]<<endl;
+								if(modes==riscv&&func1==false)risc_load(to_string(regInStack[i]),regName[i]);
 							}
-							if(modes==tigger)cout<<"  return"<<endl;
-							if(modes==riscv)risc_return();
+							if(modes==tigger&&func1==false)cout<<"  return"<<endl;
+							if(modes==riscv&&func1==false)risc_return();
 						}
 					}
 				}
@@ -2279,11 +2281,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==tigger||modes==riscv)clearAll();
 						for(int i=15;i<=25;i++)     
 						{
-							if(modes==tigger)cout<<"load "<<regInStack[i]<<" "<<regName[i]<<endl;
-							if(modes==riscv)risc_load(to_string(regInStack[i]),regName[i]);
+							if(modes==tigger&&func1==false)cout<<"load "<<regInStack[i]<<" "<<regName[i]<<endl;
+							if(modes==riscv&&func1==false)risc_load(to_string(regInStack[i]),regName[i]);
 						}
-						if(modes==tigger)cout<<"  return"<<endl;
-						if(modes==riscv)risc_return();
+						if(modes==tigger&&func1==false)cout<<"  return"<<endl;
+						if(modes==riscv&&func1==false)risc_return();
 					}
 				}
                 break;
@@ -2357,10 +2359,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 							if(modes==0)cout<<"  call f__sysy_starttime"<<endl;
 							if(modes==tigger||modes==riscv)storeGlo();
 							if(modes==tigger||modes==riscv)saveReg();
-							if(modes==tigger)cout<<"a0 = "<<val<<endl;
-							if(modes==riscv)risc_integer("a0",to_string(val));
-							if(modes==tigger)cout<<"  call f__sysy_starttime"<<endl;
-							if(modes==riscv)cout<<"  call _sysy_starttime"<<endl;
+							if(modes==tigger&&func1==false)cout<<"a0 = "<<val<<endl;
+							if(modes==riscv&&func1==false)risc_integer("a0",to_string(val));
+							if(modes==tigger&&func1==false)cout<<"  call f__sysy_starttime"<<endl;
+							if(modes==riscv&&func1==false)cout<<"  call _sysy_starttime"<<endl;
 							if(modes==tigger||modes==riscv)returnReg();
 						}
 						break;
@@ -2374,10 +2376,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 							if(modes==0)cout<<"  call f__sysy_stoptime"<<endl;
 							if(modes==tigger||modes==riscv)storeGlo();
 							if(modes==tigger||modes==riscv)saveReg();
-							if(modes==tigger)cout<<"a0 = "<<val<<endl;
-							if(modes==riscv)risc_integer("a0",to_string(val));
-							if(modes==tigger)cout<<"  call f__sysy_stoptime"<<endl;
-							if(modes==riscv)cout<<"  call _sysy_stoptime"<<endl;
+							if(modes==tigger&&func1==false)cout<<"a0 = "<<val<<endl;
+							if(modes==riscv&&func1==false)risc_integer("a0",to_string(val));
+							if(modes==tigger&&func1==false)cout<<"  call f__sysy_stoptime"<<endl;
+							if(modes==riscv&&func1==false)cout<<"  call _sysy_stoptime"<<endl;
 							if(modes==tigger||modes==riscv)returnReg();
 						}
 						break;
@@ -2387,8 +2389,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==0)cout<<"call f_"<<id<<endl;
 						if(modes==tigger||modes==riscv)storeGlo();
 						if(modes==tigger||modes==riscv)saveReg();
-						if(modes==tigger)cout<<"call f_"<<id<<endl;
-						if(modes==riscv)cout<<"  call "<<id<<endl;
+						if(modes==tigger&&func1==false)cout<<"call f_"<<id<<endl;
+						if(modes==riscv&&func1==false)cout<<"  call "<<id<<endl;
 						if(modes==tigger||modes==riscv)returnReg();
 					}
 				}
@@ -2405,10 +2407,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 						if(modes==0)cout<<"  t"<<temvarnum-1<<" = call f_"<<id<<endl;
 						if(modes==tigger||modes==riscv)storeGlo();
 						if(modes==tigger||modes==riscv)saveReg();
-						if(modes==tigger)cout<< "call f_"<<id<<endl;
-						if(modes==riscv)cout<< "  call "<<id<<endl;
-						if(modes==tigger)cout<<"store a0 "<<EMap.find("t"+to_string(temvarnum-1))->second.mem<<endl;
-						if(modes==riscv)risc_store("a0",EMap.find("t"+to_string(temvarnum-1))->second.mem);
+						if(modes==tigger&&func1==false)cout<< "call f_"<<id<<endl;
+						if(modes==riscv&&func1==false)cout<< "  call "<<id<<endl;
+						if(modes==tigger&&func1==false)cout<<"store a0 "<<EMap.find("t"+to_string(temvarnum-1))->second.mem<<endl;
+						if(modes==riscv&&func1==false)risc_store("a0",EMap.find("t"+to_string(temvarnum-1))->second.mem);
 						if(modes==tigger||modes==riscv)returnReg();
 					}
 					returnvar='t';
@@ -2457,8 +2459,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				{
                 	if(status==2||status==3)
 					{
-						if(modes==tigger)cout<<"  call f_"<<id<<endl;
-						if(modes==riscv)cout<<"  call "<<id<<endl;
+						if(modes==tigger&&func1==false)cout<<"  call f_"<<id<<endl;
+						if(modes==riscv&&func1==false)cout<<"  call "<<id<<endl;
 						if(modes==tigger||modes==riscv)returnReg();
 					}
 				}
@@ -2473,10 +2475,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					if(status==2||status==3)
 					{
 						if(modes==0)cout<<"  t"<<temvarnum-1<<" = call f_"<<id<<endl;
-						if(modes==tigger)cout<<"  call f_"<<id<<endl;
-						if(modes==riscv)cout<<"  call "<<id<<endl;
-						if(modes==tigger)cout<<"store a0 "<<EMap.find("t"+to_string(temvarnum-1))->second.mem<<endl;
-						if(modes==riscv)risc_store("a0",EMap.find("t"+to_string(temvarnum-1))->second.mem);
+						if(modes==tigger&&func1==false)cout<<"  call f_"<<id<<endl;
+						if(modes==riscv&&func1==false)cout<<"  call "<<id<<endl;
+						if(modes==tigger&&func1==false)cout<<"store a0 "<<EMap.find("t"+to_string(temvarnum-1))->second.mem<<endl;
+						if(modes==riscv&&func1==false)risc_store("a0",EMap.find("t"+to_string(temvarnum-1))->second.mem);
 						if(modes==tigger||modes==riscv)returnReg();
 					}
 					returnvar='t';
