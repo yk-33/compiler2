@@ -38,7 +38,8 @@ int brlab=-1; //break跳转
 int conlab=-1; //continue跳转
 int havewhile=0; //在while里
 int modes =1;  //编译生成模式
-int func1 = true; 
+int func1 = true;
+int regNeedST[27]; 
 int sizeForRisc; //翻译函数的大小
 void inser()
 {	value tes{'T',0,NULL,NULL,4,0,0};
@@ -446,6 +447,7 @@ int findReg(int st=0,string t1=" ",string t2=" ") {
 	}
 	Reg[chooseReg].varVector.clear();
 	//cout<<"---------------"<<chooseReg<<"-------------"<<endl;
+	regNeedST[chooseReg]=1;
 	return chooseReg;
 }
 //调用者保存
@@ -893,13 +895,13 @@ void eVarMap(string varName,int len=0,int va=0) {
 			EMap[ varName] = { false,true,"v" + to_string(gloNum),-1,0 ,arr };
 			if (len == 1) 
 			{
-				if(modes==tigger&&func1==false)cout << "v" << gloNum << " = " << va << endl;
-				if(modes==riscv&&func1==false)risc_gloVar("v"+to_string(gloNum),va);
+				if(modes==tigger)cout << "v" << gloNum << " = " << va << endl;
+				if(modes==riscv)risc_gloVar("v"+to_string(gloNum),va);
 			}
 			else
 			{
-				if(modes==tigger&&func1==false)cout << "v" << gloNum << " = malloc " << 4*len << endl;
-				if(modes==riscv&&func1==false)risc_gloArr("v"+to_string(gloNum),4*len);
+				if(modes==tigger)cout << "v" << gloNum << " = malloc " << 4*len << endl;
+				if(modes==riscv)risc_gloArr("v"+to_string(gloNum),4*len);
 			}
 			gloNum++;
 		}
@@ -1847,12 +1849,13 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				 int ii=0; int varstore,numstore,labstore;
 				 while(ii<2)
 				 {
+					 for(int j=15;j<=25;j++) regNeedST[j]=0;
 					 if(ii==0){varstore=varnum; numstore=temvarnum; labstore=label; func1=false;}
 					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=true;}
 				 if(modes==tigger||modes==riscv)clearAll();
 				 temNum=0;//栈初始位置
 				 varnum2 =varnum,temvarnum2=temvarnum;
-                 		nowmap=1;
+                nowmap=1;
 				 status=1;
 				 pnum=0;
 				 if(choose==1||choose==2)p[0]->doo();
@@ -1905,8 +1908,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 
 				for(int i=15;i<=25;i++)     
 				{
+					if(regNeedST[i]==1)
+					{
 					if(modes==tigger&&func1==false)cout<<"store "<<regName[i]<<" "<<regInStack[i]<<endl;
 					if(modes== riscv&&func1==false)risc_store(regName[i],to_string(regInStack[i]));
+					}
 				}
 				if(modes==tigger&&func1==false)cout<<"s11 = 4"<<endl;
 				if(modes==riscv&&func1==false)risc_integer("s11","4");
