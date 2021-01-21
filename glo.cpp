@@ -19,7 +19,7 @@ stack<char> stkchar;
 stack<int> stkint;
 stack<char> stkchar2;
 stack<int> stkint2;
-queue<string> quchar[2];
+queue<string> quchar[2],qustore;
 queue< node* > qunode;
 
 int status=0;    
@@ -1847,10 +1847,10 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				 int ii=0; int varstore,numstore,labstore;
 				 while(ii<2)
 				 {
-					 if(ii==1){varstore=varnum; numstore=temvarnum; labstore=label; func1=false;}
+					 if(ii==0){varstore=varnum; numstore=temvarnum; labstore=label; func1=false;}
 					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=true;}
 				 if(modes==tigger||modes==riscv)clearAll();
-				 temNum=0;
+				 temNum=0;//栈初始位置
 				 varnum2 =varnum,temvarnum2=temvarnum;
                  		nowmap=1;
 				 status=1;
@@ -1869,19 +1869,19 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				int sta;  //栈大小 /4
 				if(id=="main")
 				{
-					 sta=temNum+gtNum;
+					 sta=temNum+gtNum;     //函数内变量  全局t
 					 for(map<string,eeyoreVar>::iterator iters=EMap.begin();iters!=EMap.end();iters++)
 					 {
 						 if(iters->first[0]=='t'&&iters->second.type==0)
 						 {
 							 string ss=iters->second.mem;
-							 iters->second.mem=to_string(atoi(ss.c_str())+temNum);
+							 iters->second.mem=to_string(atoi(ss.c_str())+temNum);  //全局t，初始化时产生，函数内位置在参数和变量后面
 						 }
 					 }
 				}
 				else sta=temNum;
 
-				for(int i=0;i<=25;i++)
+				for(int i=0;i<=25;i++)    //寄存器位置在最后
 				{
 					regInStack[i]=sta++;
 				}
@@ -1912,7 +1912,9 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 				if(modes==riscv&&func1==false)risc_integer("s11","4");
 				if(id=="main")                        //main开始输出全局var
 				  while(!quchar[0].empty())
-				{  if(modes==0)cout<<"  "<<quchar[0].front()<<endl; quchar[0].pop(); }
+				{  if(modes==0)cout<<"  "<<quchar[0].front()<<endl; qustore.push(quchar[0].front()); quchar[0].pop(); }
+				while(!qustore.empty())
+				{ quchar[0].push(qustore.front()); qustore.pop();}
 				 while(!quchar[1].empty())           //函数内var
 				{  if(modes==0)cout<<"  "<<quchar[1].front()<<endl; quchar[1].pop(); }
 
@@ -1937,8 +1939,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
                 nowmap=0;
                 p[1]->doo();
 				
-				if(modes==tigger&&func1=false)cout<<"end f_"<<id<<endl;
-				if(modes==riscv&&func1=false)risc_endFunc(id);
+				if(modes==tigger&&func1==false)cout<<"end f_"<<id<<endl;
+				if(modes==riscv&&func1==false)risc_endFunc(id);
 				nowmap=0;  status = 0;
 				mp[1].erase(mp[1].begin(),mp[1].end());
 
