@@ -37,8 +37,8 @@ int label=0; //标签
 int brlab=-1; //break跳转
 int conlab=-1; //continue跳转
 int havewhile=0; //在while里
-int modes =2;  //编译生成模式
-int func1 = false; 
+int modes =1;  //编译生成模式
+int func1 = true; 
 int sizeForRisc; //翻译函数的大小
 void inser()
 {	value tes{'T',0,NULL,NULL,4,0,0};
@@ -97,7 +97,7 @@ void draw(int i,int max)
 	}
 	
 }
-//////////////////////////////////////////////////////////////////////////////// fun1==false
+//////////////////////////////////////////////////////////////////////////////// 
 //                         RISC -V
 string regName[28] = { "a0","a1","a2","a3","a4","a5","a6","a7","t0","t1","t2","t3","t4","t5","t6","s0","s1","s2" ,
 	"s3","s4","s5" ,"s6","s7","s8" ,"s9","s10","s11" ,"x0"};
@@ -1356,8 +1356,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					 	clearAll();
 					 	int v1=load(jiexi(leftvar,leftnum),false);
 					 	//int v2=load("0",false);
-						if(modes==tigger&&fun1==false)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
-						if(modes==riscv&&fun1==false)cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
+						if(modes==tigger&&func1==false)cout<<" if "<<regName[v1]<<" == "<<"x0"<<" goto l"<<temlab<<endl;
+						if(modes==riscv&&func1==false)cout<<"	beq "<<regName[v1]<<",x0,.l"<<temlab<<endl;
 					 }
 					 
 				}
@@ -1383,8 +1383,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					 	storeReg();
 					 	clearAll();
 					 	int v1=load(jiexi(leftvar,leftnum),false);
-						if(modes==tigger&&fun1==false)cout<<" if "<<regName[v1]<<" != "<<"x0"<<" goto l"<<temlab<<endl;
-						if(modes==riscv&&fun1==false)cout<<"	bne "<<regName[v1]<<",x0,.l"<<temlab<<endl;
+						if(modes==tigger&&func1==false)cout<<" if "<<regName[v1]<<" != "<<"x0"<<" goto l"<<temlab<<endl;
+						if(modes==riscv&&func1==false)cout<<"	bne "<<regName[v1]<<",x0,.l"<<temlab<<endl;
 					 }
 					 	 
 				}
@@ -1437,12 +1437,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger&&fun1==false)
+							if(modes==tigger&&func1==false)
 							{
 								cout<<"  goto l"<<temlab2<<endl;
 					 			cout<<"l"<<temlab<<':'<<endl;
 							}
-							if(modes==riscv&&fun1==false)
+							if(modes==riscv&&func1==false)
 							{
 								cout<<"	j .l"<<temlab2<<endl;
 					 			cout<<".l"<<temlab<<':'<<endl;
@@ -1454,11 +1454,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger&&fun1==false)
+							if(modes==tigger&&func1==false)
 							{
 					 			cout<<"l"<<temlab2<<":"<<endl;
 							}
-							if(modes==riscv&&fun1==false)
+							if(modes==riscv&&func1==false)
 							{
 					 			cout<<".l"<<temlab2<<":"<<endl;
 							}
@@ -1470,12 +1470,12 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger&&fun1==false)
+							if(modes==tigger&&func1==false)
 							{
 								cout<<"  goto l"<<temlab2<<endl;
 					 			cout<<"l"<<temlab<<':'<<endl;
 							}
-							if(modes==riscv&&fun1==false)
+							if(modes==riscv&&func1==false)
 							{
 								cout<<"	j .l"<<temlab2<<endl;
 					 			cout<<".l"<<temlab<<':'<<endl;
@@ -1487,11 +1487,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 								storeReg();
 								clearAll();
 							}
-							if(modes==tigger&&fun1==false)
+							if(modes==tigger&&func1==false)
 							{
 					 			cout<<"l"<<temlab2<<":"<<endl;
 							}
-							if(modes==riscv&&fun1==false)
+							if(modes==riscv&&func1==false)
 							{
 					 			cout<<".l"<<temlab2<<":"<<endl;
 							}
@@ -1844,9 +1844,11 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 		     case funcdef:
 			 {	
 				 //cout<<"--------"<<endl;
-				 int ii=0;
+				 int ii=0; int varstore,numstore,labstore;
 				 while(ii<2)
 				 {
+					 if(ii==1){varstore=varnum; numstore=temvarnum; labstore=label; func1=false;}
+					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=true;}
 				 if(modes==tigger||modes==riscv)clearAll();
 				 temNum=0;
 				 varnum2 =varnum,temvarnum2=temvarnum;
@@ -1889,25 +1891,25 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
                 	nowmap=1;
                 	p[0]->doo();
                 	if(modes==0)cout<<"f_"<<id<<" ["<<pnum<<']'<<endl;
-					if(modes==tigger)cout<<"f_"<<id<<" ["<<pnum<<']'<<" ["<<sta<<']'<<endl;
+					if(modes==tigger&&func1==false)cout<<"f_"<<id<<" ["<<pnum<<']'<<" ["<<sta<<']'<<endl;
 					sizeForRisc=(sta/4+1)*16;
-					if(modes== riscv)risc_func(id);
+					if(modes== riscv&&func1==false)risc_func(id);
 				 }
 				 else 
 				 {
 					 if(modes==0)cout<<"f_"<<id<<" [0"<<']'<<endl;
-					 if(modes==tigger)cout<<"f_"<<id<<" [0"<<']'<<" ["<<sta<<']'<<endl;
+					 if(modes==tigger&&func1==false)cout<<"f_"<<id<<" [0"<<']'<<" ["<<sta<<']'<<endl;
 					 sizeForRisc=(sta/4+1)*16;
-					 if(modes== riscv)risc_func(id);
+					 if(modes== riscv&&func1==false)risc_func(id);
 				 }
 
 				for(int i=15;i<=25;i++)     
 				{
-					if(modes==tigger)cout<<"store "<<regName[i]<<" "<<regInStack[i]<<endl;
-					if(modes== riscv)risc_store(regName[i],to_string(regInStack[i]));
+					if(modes==tigger&&func1==false)cout<<"store "<<regName[i]<<" "<<regInStack[i]<<endl;
+					if(modes== riscv&&func1==false)risc_store(regName[i],to_string(regInStack[i]));
 				}
-				if(modes==tigger)cout<<"s11 = 4"<<endl;
-				if(modes==riscv)risc_integer("s11","4");
+				if(modes==tigger&&func1==false)cout<<"s11 = 4"<<endl;
+				if(modes==riscv&&func1==false)risc_integer("s11","4");
 				if(id=="main")                        //main开始输出全局var
 				  while(!quchar[0].empty())
 				{  if(modes==0)cout<<"  "<<quchar[0].front()<<endl; quchar[0].pop(); }
@@ -1935,8 +1937,8 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
                 nowmap=0;
                 p[1]->doo();
 				
-				if(modes==tigger)cout<<"end f_"<<id<<endl;
-				if(modes==riscv)risc_endFunc(id);
+				if(modes==tigger&&func1=false)cout<<"end f_"<<id<<endl;
+				if(modes==riscv&&func1=false)risc_endFunc(id);
 				nowmap=0;  status = 0;
 				mp[1].erase(mp[1].begin(),mp[1].end());
 
