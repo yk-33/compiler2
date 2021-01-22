@@ -22,26 +22,32 @@ stack<int> stkint2;
 queue<string> quchar[2],qustore;
 queue< node* > qunode;
 
-int status=0;    
-int varnum=0;    //变量T
-int temvarnum=0; //临时变量t
-int returnnum[3];
-char returnvar;
+int modes =2;  //编译生成模式
+
+int status=0;    //控制输出
+int varnum=0;    //变量T下标
+int temvarnum=0; //临时变量t下标
+int returnnum[3]; //返回变量下标
+char returnvar;   //返回变量字母
+
 int A[MAXL]; //数组维度
 char B[MAXL];//数组格式
 int pos;  //数组位置
 int pos2;  //数组位置
 int Rnum; //可匹配右括号
+
 int pnum; //记参数个数
+
 int label=0; //标签
 int brlab=-1; //break跳转
 int conlab=-1; //continue跳转
 int havewhile=0; //在while里
-int modes =1;  //编译生成模式
+
 int func1 = false;
 int regNeedST[26];
 int calledSave[26]; 
 int sizeForRisc; //翻译函数的大小
+
 void inser()
 {	value tes{'T',0,NULL,NULL,4,0,0};
 	mp[0]["f_getint"]=tes;
@@ -247,30 +253,30 @@ void risc_loadAddr(string mempos,string reg)
 int gloNum = 0;
 int temNum = 0;
 int gtNum=0;
-
 int regInStack[26]; //内存中位置
+
 struct eeyoreVar {
-	bool canDel =false;
-	bool saved = true;
-	string mem="0";
-	int reg=-1;
-	int type = 0;
-	bool arr;
+	bool canDel =false;       //t已用过,不用回存
+	bool saved = true;        //是否需要保存
+	string mem="0";         //内存中位置
+	int reg=-1;             //在某个寄存器
+	int type = 0;           //全局或局部变量
+	bool arr;               //变量是否是数组
 };
 struct regi {
-	bool canUse= true;
-	int reg = -1;
-	int val = 0;
-	vector<string> varVector;
+	bool canUse= true;         //寄存器可用
+	int reg = -1;             //记录自身编号
+	int val = 0;               //代价,用来排序
+	vector<string> varVector;    //容器,记录有哪些变量
 	
 	bool operator<(const regi& r) const {
 		return val < r.val;
 	}
 };
-priority_queue<regi>regs;
-map<string, eeyoreVar>EMap;
-map<string, eeyoreVar>NMap;
-regi Reg[28];
+priority_queue<regi>regs;        //堆，用来排序寄存器，选最优
+map<string, eeyoreVar>EMap;      //变量哈希表
+map<string, eeyoreVar>NMap;      //数哈希表
+regi Reg[28];                   //寄存器数组
 
 //解析变量
 string jiexi(char v1,int v2)
@@ -323,8 +329,8 @@ void clearAll()
 }
 //找可用寄存器
 int findReg(int st=0,string t1=" ",string t2=" ") {
-	
-	for (int i = 0; i <= 24; i++)      //在前25个寄存器中找，第26个寄存器s10用来防止寄存器不够，s11和x0固定存4和0，这三个不可用  
+	//在前25个寄存器中找，第26个寄存器s10用来防止寄存器不够，s11和x0固定存4和0，这三个不可用
+	for (int i = 0; i <= 24; i++)  
 	{
 		if (Reg[i].canUse == true)    //寄存器可用时查看此寄存器
 		{
@@ -456,13 +462,13 @@ if(chooseReg>=15)
 void saveReg(int callerSave[])
 {
 	int needSave;
-	for(int j=0;j<=14;j++){
+	for(int j=0;j<=14;j++){  //遍历调用者保存寄存器
 		callerSave[j]=0;
 		needSave=0;
-		for (vector<string>::iterator it = Reg[j].varVector.begin(); it != Reg[j].varVector.end(); it++)
+		for (vector<string>::iterator it = Reg[j].varVector.begin(); it != Reg[j].varVector.end(); it++) 
 		{
 			string var = *it;
-			if(var[0] != 't') needSave=1;
+			if(var[0] != 't') needSave=1;   
 			if(var[0] == 't'&&EMap.find(var)->second.saved == false) needSave=1;
 		}
 		if(needSave==1)
@@ -500,12 +506,12 @@ void loadInReg(string evar,int reg)
 		map<string, eeyoreVar>::iterator iter = EMap.find(evar);
 		if (iter->second.reg != -1)
 		{
-			if(iter->second.reg>=15)
+			if(iter->second.reg>=15) //非调用者保存寄存器
 			{
 				if(modes==tigger&&func1==false)cout<<regName[reg]<<" = "<<regName[iter->second.reg]<<endl;
 				if(modes==riscv&&func1==false)risc_mv(regName[reg],regName[iter->second.reg]);
 			}
-			else
+			else     //调用者保存寄存器
 			{
 				if(modes==tigger&&func1==false)cout<<"load "<<regInStack[iter->second.reg]<<" "<<regName[reg]<<endl;
 				if(modes==riscv&&func1==false)risc_load(to_string(regInStack[iter->second.reg]),regName[reg]);
@@ -686,7 +692,7 @@ void storeGlo()
 		}
 	}
 }
-//逻辑块寄存器回存
+//分支处寄存器回存
 void storeReg()
 {
 	for (int o = 0; o <= 1; o++)
@@ -755,14 +761,14 @@ void storeReg()
 	}
 }
 //赋值
-void varAssign(string var1,string var2)
-{//cout<<"-------------"<<var1<<"    "<<var2<<endl;
-	int i = load(var2,false);
-	if(var2[0]=='t')
+void varAssign(string var1,string var2)   //对应eeyore语句: va1 =var2
+{  
+	int i = load(var2,false);  //返回var2所在寄存器
+	if(var2[0]=='t')      //var2如果是t，用完后不需回存
 		EMap.find(var2)->second.canDel = true;
-	int reg = EMap.find(var1)->second.reg;
+	int reg = EMap.find(var1)->second.reg;  //查找var1所在寄存器
 	
-	if (reg != -1)
+	if (reg != -1)   //若有，则把var1从中去除
 	{
 		vector<string>::iterator iter;
 		for (iter = Reg[reg].varVector.begin(); iter != Reg[reg].varVector.end(); iter++)
@@ -770,17 +776,17 @@ void varAssign(string var1,string var2)
 			if (*iter == var1) { iter=Reg[reg].varVector.erase(iter)-1; }
 		}
 	}
-	EMap.find(var1)->second.reg = i;
-	EMap.find(var1)->second.saved = false;
+	EMap.find(var1)->second.reg = i;         //var1加入var2所在寄存器，地址描述符也做修改
+	EMap.find(var1)->second.saved = false;   
 	Reg[i].varVector.push_back(var1);
 }
 //使用数组
-void arrUse(string t,string arr,string arrIndex)
+void arrUse(string t,string arr,string arrIndex) // t = arr [ arrIndex ]
 {
-	if ((arrIndex[0] - '0' >= 0 && arrIndex[0] - '0' <= 9)||arrIndex[0]=='-')
+	if ((arrIndex[0] - '0' >= 0 && arrIndex[0] - '0' <= 9)||arrIndex[0]=='-')// arrIndex 是数
 	{
 		int index = atoi(arrIndex.c_str());
-		if (arr[0] == 'T'&&EMap.find(arr)->second.type == 1)
+		if (arr[0] == 'T'&&EMap.find(arr)->second.type == 1)   //函数内局部变量
 		{
 			int i = findReg();
 			int j = atoi((EMap.find(arr)->second.mem).c_str());
@@ -792,7 +798,7 @@ void arrUse(string t,string arr,string arrIndex)
 		}
 		else
 		{
-			int i = load(arr, true);
+			int i = load(arr, true);  //基地址载入寄存器
 			int j= findReg();
 			if(modes==tigger&&func1==false)cout << regName[j] << " = " << regName[i] << "[ "<< index <<" ] " << endl;
 			if(modes==riscv&&func1==false)risc_arrUse(regName[j],regName[i],to_string(index));
@@ -801,12 +807,12 @@ void arrUse(string t,string arr,string arrIndex)
 			EMap.find(t)->second.saved = false;
 		}
 	}
-	else
+	else  //arrIndex不是数
 	{
-		int i = load(arr, true);
+		int i = load(arr, true);       
 		Reg[i].canUse = false;
 		int j = load(arrIndex, false);
-		if (arrIndex[0] == 't')
+		if (arrIndex[0] == 't')           //arrIndex为 t ，此次使用后可删
 			EMap.find(arrIndex)->second.canDel = true;
 		int k = findReg();
 		Reg[i].canUse = true;
@@ -1863,33 +1869,31 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 			break;
 		     case funcdef:
 			 {	
-				 //cout<<"--------"<<endl;
 				 int ii=0; int varstore,numstore,labstore;for(int j=15;j<=25;j++) {regNeedST[j]=0;}
 				 while(ii<2)
 				 {
-					 
 					 if(ii==0){varstore=varnum; numstore=temvarnum; labstore=label; func1=true;}
 					 else{varnum=varstore; temvarnum=numstore; label=labstore; func1=false;
 						for(int i=15;i<=25;i++){ calledSave[i]=regNeedST[i];    }
 						}
-				 if(modes==tigger||modes==riscv)clearAll();
-				 temNum=0;//栈初始位置
-				 varnum2 =varnum,temvarnum2=temvarnum;
-                nowmap=1;
-				 status=1;
-				 pnum=0;
-				 if(choose==1||choose==2)p[0]->doo();
-				 int arr =3; //函数无返回值
-				if(choose==2||choose==4) arr=4;
-                value tes{'F',0,NULL,NULL,arr,0,0};
-				mp[0]["f_"+id]=tes;
-				nowmap=0; //block前降
-				p[1]->doo();                                //遍历函数获取var
-				mp[1].erase(mp[1].begin(),mp[1].end());   //消除改变
+					if(modes==tigger||modes==riscv)clearAll();
+					temNum=0;//栈初始位置
+					varnum2 =varnum,temvarnum2=temvarnum;
+					nowmap=1;
+					status=1;
+					pnum=0;
+					if(choose==1||choose==2)p[0]->doo();
+					int arr =3; //函数无返回值
+					if(choose==2||choose==4) arr=4;
+					value tes{'F',0,NULL,NULL,arr,0,0};
+					mp[0]["f_"+id]=tes;
+					nowmap=0; //block前降
+					p[1]->doo();                                //遍历函数获取var
+					mp[1].erase(mp[1].begin(),mp[1].end());   //消除改变
 
-				status=2; 
-				varnum=varnum2; temvarnum=temvarnum2;
-				int sta;  //栈大小 /4
+					status=2; 
+					varnum=varnum2; temvarnum=temvarnum2;
+					int sta;  //栈大小 /4
 				if(id=="main")
 				{
 					 sta=temNum+gtNum;     //函数内变量  全局t
@@ -2483,8 +2487,7 @@ void node::doo(int cosnum=0 , int *constarr=NULL)
 					if(status==2||status==3)
 					{
 						if(modes==0)cout<<"  param "<<stkchar2.top()<<stkint2.top()<<endl;
-						//cout<<"-------"<<jiexi(stkchar2.top(),stkint2.top())<<endl;
-						if(modes==tigger||modes==riscv)loadInReg(jiexi(stkchar2.top(),stkint2.top()),countReg);
+						if(modes==tigger||modes==riscv)loadInReg(jiexi(stkchar2.top(),stkint2.top()) , countReg);
 						countReg++;
 					}
 					stkchar2.pop(); stkint2.pop();
